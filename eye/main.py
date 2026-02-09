@@ -12,4 +12,4 @@ while True:
     led.value(1)
     time.sleep(3)
     led.value(0)
-    time.sleep(3)
+    time.sleep(0.5)
