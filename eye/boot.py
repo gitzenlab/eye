@@ -8,7 +8,7 @@ ota = ota.ota(
   repo="eye",
   branch="main",
   working_dir="eye",
-  files = ["boot.py", "main.py"]
+  files = ["boot.py", "main.py", "dotmatrix.py"]
 )
 
 try:
