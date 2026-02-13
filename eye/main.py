@@ -1,15 +1,25 @@
 import gc
-import machine
 import time
+import machine
+import dotmatrix
 
 gc.collect()
 gc.enable()
 
-
 led = machine.Pin(2, machine.Pin.OUT)
+spi = SPI(2, baudrate=10000000, polarity=1, phase=0, sck=Pin(18), mosi=Pin(23))
+cs = Pin(5, Pin.OUT)
+display = dotmatrix(spi, cs, 4)
+
+display.brightness(5)
+display.clear()
+display.show()
+
+display.text("SONA")
+display.show()
 
 while True:
     led.value(1)
-    time.sleep(7)
+    time.sleep(0.5)
     led.value(0)
-    time.sleep(0.2)
+    time.sleep(0.5)
