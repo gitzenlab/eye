@@ -13,7 +13,6 @@ TIMEZONE_OFFSET_SECONDS = 19800
 
 ota = ota.ota()
 led = machine.Pin(2, machine.Pin.OUT)
-
 spi = machine.SPI(2, baudrate=10000000, polarity=1, phase=0, sck=machine.Pin(18), mosi=machine.Pin(23))
 cs = machine.Pin(5, machine.Pin.OUT)
 display = dotmatrix.dotmatrix(spi, cs, 4)
@@ -37,7 +36,6 @@ ntp_update_timer_id = 3
 
 screen_update_due = False
 ntp_update_due = False
-
 time_valid = False
 
 screen_timer = machine.Timer(screen_update_timer_id)
@@ -62,7 +60,7 @@ def screen_update(timer):
     screen_update_due = True
     
 screen_timer.init(mode=machine.Timer.PERIODIC, period=500, callback=screen_update)
-ntp_timer.init(mode=machine.Timer.PERIODIC, period=10000, callback=ntp_update)
+ntp_timer.init(mode=machine.Timer.PERIODIC, period=900000, callback=ntp_update)
 
 def get_local_time(offset_seconds):
     utc_seconds = time.time()
@@ -81,17 +79,42 @@ while True:
             display.clear()
             display.matrix(str(current_time[0]), x_offset=1)
             display.matrix(str(current_time[1]), x_offset=8)
-            
             if not led.value():
                 display.matrix(str(current_time[2]), x_offset=15)
-                
             display.matrix(str(current_time[3]), x_offset=18)
             display.matrix(str(current_time[4]), x_offset=25)
             display.show()
         else:
             display.clear()
             display.text("::::")
-            display.show()            
+            display.show()
+            if wlan.isconnected():
+                try:
+                    ntptime.settime()
+                    display.clear()
+                    display.fill(1)
+                    display.show()
+                    time_valid = True
+                except OSError as e:
+                    display.clear()
+                    display.fill(0)
+                    display.show()
+            else:
+                try:
+                    ota.wificonnect()
+                    if wlan.isconnected():
+                        try:
+                            ntptime.settime()
+                            display.clear()
+                            display.fill(1)
+                            display.show()
+                            time_valid = True
+                        except OSError as e:
+                            display.clear()
+                            display.fill(0)
+                            display.show()
+                except OSError as e:
+                    pass
         screen_update_due = False
         
     if ntp_update_due:
@@ -104,6 +127,7 @@ while True:
                 time_valid = True
             except OSError as e:
                 display.clear()
+                display.fill(0)
                 display.show()
         else:
             try:
@@ -117,6 +141,7 @@ while True:
                         time_valid = True
                     except OSError as e:
                         display.clear()
+                        display.fill(0)
                         display.show()
             except OSError as e:
                 pass
