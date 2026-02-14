@@ -10,44 +10,58 @@ gc.collect()
 gc.enable()
 
 TIMEZONE_OFFSET_SECONDS = 19800
+SCREEN_UPDATE_INTERVAL_MS = 500
+NTP_TIME_SYNC_INTERVAL_MS = 900000
+SCREEN_UPDATE_HARDWARE_TIMER_ID = 2
+NTP_UPDATE_HARDWARE_TIMER_ID = 3
+SPI_BUS_FOR_DOTMATRIX_DISPLAY = 2
+SPI_BUS_COMMUNICATION_BAUDRATE = 10000000
+SPI_BUS_CLK_PIN = 18
+SPI_BUS_DOUT_PIN = 23
+DOTMATRIX_CHIPSELECT_PIN = 5
+DOTMATRIX_BRIGHTNESS_LEVEL = 10
+DOTMATRIX_NUMBER_OF_MODULES = 4
+ONBOARD_LED_BLINK_PIN = 2
+WDT_TIMEOUT_MS = 30000
+DOT_MATRIX_STARTUP_MESSAGE = "WISE"
+DOT_MATRIX_STARTUP_MESSAGE_DURATION = 2
+DOT_MATRIX_STARTUP_BLANK_DURATION = 1
 
 ota = ota.ota()
-led = machine.Pin(2, machine.Pin.OUT)
-spi = machine.SPI(2, baudrate=10000000, polarity=1, phase=0, sck=machine.Pin(18), mosi=machine.Pin(23))
-cs = machine.Pin(5, machine.Pin.OUT)
-display = dotmatrix.dotmatrix(spi, cs, 4)
-
-display.brightness(10)
-display.clear()
-display.show()
-
-display.text("SONA")
-display.show()
-
-time.sleep(2)
-
-display.clear()
-display.show()
-
-time.sleep(1)
-
-screen_update_timer_id = 2
-ntp_update_timer_id = 3
+led = machine.Pin(ONBOARD_LED_BLINK_PIN, machine.Pin.OUT)
+spi = machine.SPI(SPI_BUS_FOR_DOTMATRIX_DISPLAY, baudrate=SPI_BUS_COMMUNICATION_BAUDRATE, polarity=1, phase=0, sck=machine.Pin(SPI_BUS_CLK_PIN), mosi=machine.Pin(SPI_BUS_DOUT_PIN))
+cs = machine.Pin(DOTMATRIX_CHIPSELECT_PIN, machine.Pin.OUT)
+display = dotmatrix.dotmatrix(spi, cs, DOTMATRIX_NUMBER_OF_MODULES)
+wdt = machine.WDT(timeout=WDT_TIMEOUT_MS)
 
 screen_update_due = False
 ntp_update_due = False
-time_valid = False
+system_time_synchronised = False
 
-screen_timer = machine.Timer(screen_update_timer_id)
-ntp_timer = machine.Timer(ntp_update_timer_id)
+screen_timer = machine.Timer(SCREEN_UPDATE_HARDWARE_TIMER_ID)
+ntp_timer = machine.Timer(NTP_UPDATE_HARDWARE_TIMER_ID)
+display.brightness(DOTMATRIX_BRIGHTNESS_LEVEL)
+
+ap_if = network.WLAN(network.AP_IF)
+if ap_if.active():
+    ap_if.active(False)
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 
+display.clear()
+display.show()
+display.text(DOT_MATRIX_STARTUP_MESSAGE)
+display.show()
+time.sleep(DOT_MATRIX_STARTUP_MESSAGE_DURATION)
+display.clear()
+display.show()
+time.sleep(DOT_MATRIX_STARTUP_BLANK_DURATION)
+
 if wlan.isconnected():
     try:
         ntptime.settime()
-        time_valid = True
+        system_time_synchronised = True
     except OSError as e:
         pass
 
@@ -58,19 +72,19 @@ def ntp_update(timer):
 def screen_update(timer):
     global screen_update_due
     screen_update_due = True
-    
-screen_timer.init(mode=machine.Timer.PERIODIC, period=500, callback=screen_update)
-ntp_timer.init(mode=machine.Timer.PERIODIC, period=900000, callback=ntp_update)
 
 def get_local_time(offset_seconds):
     utc_seconds = time.time()
     local_seconds = utc_seconds + offset_seconds
     local_time_tuple = time.localtime(local_seconds)
     return local_time_tuple
+    
+screen_timer.init(mode=machine.Timer.PERIODIC, period=SCREEN_UPDATE_INTERVAL_MS, callback=screen_update)
+ntp_timer.init(mode=machine.Timer.PERIODIC, period=NTP_TIME_SYNC_INTERVAL_MS, callback=ntp_update)
 
 while True:
     if screen_update_due:
-        if time_valid:
+        if system_time_synchronised:
             led.value(not led.value())
             current_local_time = get_local_time(TIMEZONE_OFFSET_SECONDS)
             #print("Local time: {0}/{1}/{2} {3}:{4}:{5}".format(*current_local_time))
@@ -94,7 +108,7 @@ while True:
                     display.clear()
                     display.fill(1)
                     display.show()
-                    time_valid = True
+                    system_time_synchronised = True
                 except OSError as e:
                     display.clear()
                     display.fill(0)
@@ -108,13 +122,14 @@ while True:
                             display.clear()
                             display.fill(1)
                             display.show()
-                            time_valid = True
+                            system_time_synchronised = True
                         except OSError as e:
                             display.clear()
                             display.fill(0)
                             display.show()
                 except OSError as e:
                     pass
+        wdt.feed()
         screen_update_due = False
         
     if ntp_update_due:
@@ -124,7 +139,7 @@ while True:
                 display.clear()
                 display.fill(1)
                 display.show()
-                time_valid = True
+                system_time_synchronised = True
             except OSError as e:
                 display.clear()
                 display.fill(0)
@@ -138,7 +153,7 @@ while True:
                         display.clear()
                         display.fill(1)
                         display.show()
-                        time_valid = True
+                        system_time_synchronised = True
                     except OSError as e:
                         display.clear()
                         display.fill(0)
