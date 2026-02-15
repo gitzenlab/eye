@@ -31,9 +31,6 @@ import network
 import ntptime
 import dotmatrix
 
-gc.collect()
-gc.enable()
-
 TIMEZONE_OFFSET_SECONDS = 19800
 SCREEN_UPDATE_INTERVAL_MS = 500
 NTP_TIME_SYNC_INTERVAL_MS = 900000
@@ -51,6 +48,9 @@ WDT_TIMEOUT_MS = 30000
 DOT_MATRIX_STARTUP_MESSAGE = "SONA"
 DOT_MATRIX_STARTUP_MESSAGE_DURATION = 2
 DOT_MATRIX_STARTUP_BLANK_DURATION = 1
+
+gc.collect()
+gc.enable()
 
 ota = ota.ota()
 led = machine.Pin(ONBOARD_LED_BLINK_PIN, machine.Pin.OUT)
