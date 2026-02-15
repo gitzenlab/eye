@@ -15,11 +15,11 @@ VCC                5V
 
 GND                GND
 
-DIN                P23
+DIN                D23
 
-CS                 P5
+CS                 D5
 
-CLK                P18
+CLK                D18
 
 """
 
