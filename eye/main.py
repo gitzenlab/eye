@@ -1,3 +1,23 @@
+"""
+
+DOTMATRIX MODULE CONNECTION:
+
+
+DOTMATRIX          ESP32
+
+VCC                5V
+
+GND                GND
+
+DIN                P23
+
+CS                 P5
+
+CLK                P18
+
+
+"""
+
 import gc
 import ota
 import time
