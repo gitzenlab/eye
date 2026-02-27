@@ -79,7 +79,9 @@ GND                GND
 DATA               D4
 ------------------------------
 
+
 """
+
 
 import gc
 import ota
@@ -230,7 +232,7 @@ def onewire_read_data():
     global ds18b20_temperature
     if onewire_sensor_active:
         try:
-            ds18b20_temperature = ds.read_temp(0)
+            ds18b20_temperature = round(ds.read_temp(0),2)
         except Exception as e:
             onewire_sensor_active = False
             ds18b20_temperature = 0
