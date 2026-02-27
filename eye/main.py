@@ -40,7 +40,7 @@ DIN                D33
 
 
 ------------------------------
-MULTI-SENSOR CONNECTION:
+I2C MULTI-SENSOR CONNECTION:
 ------------------------------
 MULTI-SENSOR       ESP32
 
@@ -68,15 +68,15 @@ DOUT               D15
 
 
 ------------------------------
-LIQUID TEMP SENSOR CONNECTION:
+ONEWIRE TEMP SENSOR CONNECTION:
 ------------------------------
-LIQUID TEMP SENSOR   ESP32
+TEMP SENSOR        ESP32
 
-VCC                  3V3
+VCC                3V3
 
-GND                  GND
+GND                GND
 
-DATA                 D4
+DATA               D4
 ------------------------------
 
 """
