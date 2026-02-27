@@ -216,11 +216,15 @@ def get_local_time(offset_seconds):
     return local_time_tuple
 
 def initiate_onewire_read():
+    global ds18b20_temperature
     if onewire_sensor_active:
         try:
             ds.convert_temp()
         except Exception as e:
             onewire_sensor_active = False
+            ds18b20_temperature = 0
+    else:
+        ds18b20_temperature = 0
 
 def onewire_read_data():
     global ds18b20_temperature
@@ -228,7 +232,10 @@ def onewire_read_data():
         try:
             ds18b20_temperature = ds.read_temp(0)
         except Exception as e:
-            onewire_sensor_active = False            
+            onewire_sensor_active = False
+            ds18b20_temperature = 0
+    else:
+        ds18b20_temperature = 0
 
 def update_cloud():
     global ubidots_connected
@@ -249,12 +256,13 @@ def update_cloud():
             ubidots_connected = False
             
     if ubidots_connected:
-        if bmp280_pressure > 0:
+        if bmp280_pressure > 0 or aht20_relative_humidity > 0 or ds18b20_temperature > 0:
             try:
                 sensor_data = {
-                    "temperature": aht20_temperature,
-                    "humidity": aht20_relative_humidity,
-                    "pressure": bmp280_pressure
+                    "air_temperature": aht20_temperature,
+                    "air_pressure": bmp280_pressure
+                    "relative_humidity": aht20_relative_humidity,
+                    "water_temperature": ds18b20_temperature
                 }
                 json_payload = ujson.dumps(sensor_data)
                 ubidots.publish(UBIDOTS_MQTT_TOPIC, json_payload.encode('utf-8'))
@@ -265,6 +273,7 @@ def update_cloud():
     aht20_relative_humidity = 0
     bmp280_temperature = 0
     bmp280_pressure = 0
+    ds18b20_temperature = 0
 
 def multi_sensor():
     global multi_sensor_active
