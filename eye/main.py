@@ -157,12 +157,16 @@ ntp_update_due = False
 cloud_update_due = False
 system_time_synchronised = False
 multi_sensor_active = False
+onewire_sensor_active = False
+onewire_wait_due = False
+onewire_read_due = False
 ubidots_connected = False
 color_pointer = 0
 aht20_temperature = 0
 aht20_relative_humidity = 0
 bmp280_temperature = 0
 bmp280_pressure = 0
+ds18b20_temperature = 0
 
 screen_timer = machine.Timer(SCREEN_UPDATE_HARDWARE_TIMER_ID)
 sensor_timer = machine.Timer(SENSOR_UPDATE_HARDWARE_TIMER_ID)
@@ -182,6 +186,12 @@ if ap_if.active():
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
+
+try:
+    roms = ds.scan()
+    onewire_sensor_active = True
+except Exception as e:
+    onewire_sensor_active = False
 
 display.clear()
 display.show()
@@ -204,6 +214,21 @@ def get_local_time(offset_seconds):
     local_seconds = utc_seconds + offset_seconds
     local_time_tuple = time.localtime(local_seconds)
     return local_time_tuple
+
+def initiate_onewire_read():
+    if onewire_sensor_active:
+        try:
+            ds.convert_temp()
+        except Exception as e:
+            onewire_sensor_active = False
+
+def newire_read_data():
+    global ds18b20_temperature
+    if onewire_sensor_active:
+        try:
+            ds18b20_temperature = ds.read_temp(0)
+        except Exception as e:
+            onewire_sensor_active = False            
 
 def update_cloud():
     global ubidots_connected
@@ -337,9 +362,17 @@ while True:
             
             if sensor_update_due:
                 multi_sensor()
+                initiate_onewire_read()
                 sensor_update_due = False
+                onewire_wait_due = True
+            elif onewire_wait_due:
+                onewire_wait_due = False
+                onewire_read_due = True
+            elif onewire_read_due:
+                onewire_read_data()
+                onewire_read_due = False
                 cloud_update_due = True
-            elif cloud_update_due:
+            elif cloud_update_due:                
                 update_cloud()
                 cloud_update_due = False
             else:
