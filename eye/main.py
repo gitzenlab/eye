@@ -66,6 +66,19 @@ GND                GND
 DOUT               D15
 ------------------------------
 
+
+------------------------------
+LIQUID TEMP SENSOR CONNECTION:
+------------------------------
+LIQUID TEMP SENSOR   ESP32
+
+VCC                  3V3
+
+GND                  GND
+
+DATA                 D4
+------------------------------
+
 """
 
 import gc
@@ -76,6 +89,8 @@ import sensor
 import machine
 import network
 import ntptime
+import onewire
+import ds18x20
 import neopixel
 import dotmatrix
 import umqtt.robust
@@ -101,6 +116,7 @@ NEOPIXEL_PIXEL_COUNT = 16                                    ### check and custo
 NTP_TIME_SYNC_INTERVAL_MS = 900000
 NTP_UPDATE_HARDWARE_TIMER_ID = 3
 ONBOARD_LED_BLINK_PIN = 2
+ONEWIRE_DATA_PIN = 4
 SCREEN_UPDATE_HARDWARE_TIMER_ID = 2
 SCREEN_UPDATE_INTERVAL_MS = 500
 SENSOR_UPDATE_HARDWARE_TIMER_ID = 1
