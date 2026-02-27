@@ -222,7 +222,7 @@ def initiate_onewire_read():
         except Exception as e:
             onewire_sensor_active = False
 
-def newire_read_data():
+def onewire_read_data():
     global ds18b20_temperature
     if onewire_sensor_active:
         try:
@@ -365,16 +365,20 @@ while True:
                 initiate_onewire_read()
                 sensor_update_due = False
                 onewire_wait_due = True
+                rainbow()
             elif onewire_wait_due:
                 onewire_wait_due = False
                 onewire_read_due = True
+                rainbow()
             elif onewire_read_due:
                 onewire_read_data()
                 onewire_read_due = False
                 cloud_update_due = True
+                rainbow()
             elif cloud_update_due:                
                 update_cloud()
                 cloud_update_due = False
+                rainbow()
             else:
                 rainbow()
         else:
