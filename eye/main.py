@@ -164,6 +164,7 @@ onewire_sensor_active = False
 onewire_wait_due = False
 onewire_read_due = False
 ubidots_connected = False
+
 color_pointer = 0
 aht20_temperature = 0
 aht20_relative_humidity = 0
@@ -221,6 +222,7 @@ def get_local_time(offset_seconds):
 
 def initiate_onewire_read():
     global ds18b20_temperature
+    
     if onewire_sensor_active:
         try:
             ds.convert_temp()
@@ -232,6 +234,7 @@ def initiate_onewire_read():
 
 def onewire_read_data():
     global ds18b20_temperature
+    
     if onewire_sensor_active:
         try:
             ds18b20_temperature = round(ds.read_temp(0),2)
