@@ -267,7 +267,7 @@ def update_cloud():
             try:
                 sensor_data = {
                     "air_temperature": aht20_temperature,
-                    "air_pressure": bmp280_pressure
+                    "air_pressure": bmp280_pressure,
                     "relative_humidity": aht20_relative_humidity,
                     "water_temperature": ds18b20_temperature
                 }
