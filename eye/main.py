@@ -222,6 +222,7 @@ def get_local_time(offset_seconds):
 
 def initiate_onewire_read():
     global ds18b20_temperature
+    global onewire_sensor_active
     
     if onewire_sensor_active:
         try:
@@ -231,9 +232,11 @@ def initiate_onewire_read():
             ds18b20_temperature = 0
     else:
         ds18b20_temperature = 0
+    return True
 
 def onewire_read_data():
     global ds18b20_temperature
+    global onewire_sensor_active
     
     if onewire_sensor_active:
         try:
@@ -243,6 +246,7 @@ def onewire_read_data():
             ds18b20_temperature = 0
     else:
         ds18b20_temperature = 0
+    return True
 
 def update_cloud():
     global ubidots_connected
@@ -251,6 +255,7 @@ def update_cloud():
     global aht20_relative_humidity
     global bmp280_temperature
     global bmp280_pressure
+    global ds18b20_temperature
     
     if not ubidots_connected:
         if wlan.isconnected():
@@ -281,6 +286,7 @@ def update_cloud():
     bmp280_temperature = 0
     bmp280_pressure = 0
     ds18b20_temperature = 0
+    return True
 
 def multi_sensor():
     global multi_sensor_active
@@ -289,7 +295,6 @@ def multi_sensor():
     global aht20_relative_humidity
     global bmp280_temperature
     global bmp280_pressure
-    
     global aht20
     global bmp280
     
@@ -318,6 +323,7 @@ def multi_sensor():
                     multi_sensor_active = False
         except OSError as e:
             multi_sensor_active = False  
+    return True
 
 def rainbow():
     global color_pointer
@@ -341,18 +347,22 @@ def rainbow():
         if color_pointer > 255:
             color_pointer = 0
     neo.write()
+    return True
 
 def ntp_update(timer):
     global ntp_update_due
     ntp_update_due = True
+    return True
 
 def sensor_update(timer):
     global sensor_update_due
     sensor_update_due = True
+    return True
 
 def screen_update(timer):
     global screen_update_due
     screen_update_due = True
+    return True
 
 screen_timer.init(mode=machine.Timer.PERIODIC, period=SCREEN_UPDATE_INTERVAL_MS, callback=screen_update)
 sensor_timer.init(mode=machine.Timer.PERIODIC, period=SENSOR_UPDATE_INTERVAL_MS, callback=sensor_update)
@@ -381,7 +391,7 @@ while True:
                 initiate_onewire_read()
                 sensor_update_due = False
                 onewire_wait_due = True
-                rainbow()
+                #rainbow()
             elif onewire_wait_due:
                 onewire_wait_due = False
                 onewire_read_due = True
@@ -390,11 +400,11 @@ while True:
                 onewire_read_data()
                 onewire_read_due = False
                 cloud_update_due = True
-                rainbow()
+                #rainbow()
             elif cloud_update_due:                
                 update_cloud()
                 cloud_update_due = False
-                rainbow()
+                #rainbow()
             else:
                 rainbow()
         else:
