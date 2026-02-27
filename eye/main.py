@@ -119,6 +119,7 @@ NTP_TIME_SYNC_INTERVAL_MS = 900000
 NTP_UPDATE_HARDWARE_TIMER_ID = 3
 ONBOARD_LED_BLINK_PIN = 2
 ONEWIRE_DATA_PIN = 4
+ONEWIRE_TEMP_SENSOR_RESOLUTION = 12
 SCREEN_UPDATE_HARDWARE_TIMER_ID = 2
 SCREEN_UPDATE_INTERVAL_MS = 500
 SENSOR_UPDATE_HARDWARE_TIMER_ID = 1
@@ -191,6 +192,7 @@ wlan.active(True)
 
 try:
     roms = ds.scan()
+    ds.resolution(roms[0], ONEWIRE_TEMP_SENSOR_RESOLUTION)
     onewire_sensor_active = True
 except Exception as e:
     onewire_sensor_active = False
