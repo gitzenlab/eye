@@ -119,7 +119,6 @@ NTP_TIME_SYNC_INTERVAL_MS = 900000
 NTP_UPDATE_HARDWARE_TIMER_ID = 3
 ONBOARD_LED_BLINK_PIN = 2
 ONEWIRE_DATA_PIN = 4
-ONEWIRE_TEMP_SENSOR_RESOLUTION = 12
 SCREEN_UPDATE_HARDWARE_TIMER_ID = 2
 SCREEN_UPDATE_INTERVAL_MS = 500
 SENSOR_UPDATE_HARDWARE_TIMER_ID = 1
@@ -193,7 +192,6 @@ wlan.active(True)
 
 try:
     roms = ds.scan()
-    ds.resolution(roms[0], ONEWIRE_TEMP_SENSOR_RESOLUTION)
     onewire_sensor_active = True
 except Exception as e:
     onewire_sensor_active = False
@@ -232,15 +230,27 @@ def initiate_onewire_read():
             ds18b20_temperature = 0
     else:
         ds18b20_temperature = 0
+        try:
+            roms = ds.scan()
+            onewire_sensor_active = True
+            try:
+                ds.convert_temp()
+            except Exception as e:
+                onewire_sensor_active = False
+                ds18b20_temperature = 0
+        except Exception as e:
+            onewire_sensor_active = False
+            ds18b20_temperature = 0
     return True
 
 def onewire_read_data():
     global ds18b20_temperature
     global onewire_sensor_active
+    global roms
     
     if onewire_sensor_active:
         try:
-            ds18b20_temperature = round(ds.read_temp(0),2)
+            ds18b20_temperature = round(ds.read_temp(roms[0]),2)
         except Exception as e:
             onewire_sensor_active = False
             ds18b20_temperature = 0
